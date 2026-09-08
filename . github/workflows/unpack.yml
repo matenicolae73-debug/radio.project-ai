@@ -1,0 +1,54 @@
+name: Unpack Viral Radio
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  unpack:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Unzip Viral Radio
+        run: |
+          ZIP=$(find . -maxdepth 1 -type f -name "*.zip" | head -n 1)
+
+          if [ -z "$ZIP" ]; then
+            echo "Nu am găsit niciun ZIP."
+            exit 1
+          fi
+
+          echo "Dezarhivez: $ZIP"
+          unzip -o "$ZIP" -d .
+
+          rm "$ZIP"
+
+      - name: Move project files to root
+        run: |
+          DIR=$(find . -maxdepth 1 -type d \
+            ! -name "." \
+            ! -name ".git" \
+            ! -name ".github" | head -n 1)
+
+          if [ -n "$DIR" ]; then
+            shopt -s dotglob
+            cp -r "$DIR"/* .
+            rm -rf "$DIR"
+          fi
+
+      - name: Commit unpacked files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add .
+          git commit -m "Unpack Viral Radio project" || echo "Nothing to commit"
+          git push
