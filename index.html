@@ -1,0 +1,214 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Viral Radio — The World Is Listening</title><style>
+*{box-sizing:border-box}body{margin:0;background:#030914;color:#eef6ff;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}header{height:74px;border-bottom:1px solid #16304f;display:flex;align-items:center;gap:24px;padding:0 28px;background:#050d1a;position:sticky;top:0;z-index:5}.logo{font-weight:900;font-size:24px;letter-spacing:.5px}.logo span{color:#8c5cff}.tag{font-size:10px;color:#89a4c1;letter-spacing:2px}.nav{display:flex;gap:24px;margin-left:auto;color:#9db4ce;font-size:14px}.nav a{color:inherit;text-decoration:none}.live{background:#ff2f7d;border-radius:22px;padding:10px 17px;font-weight:800}.listeners{color:#a9bed6}.wrap{max-width:1220px;margin:auto;padding:28px 20px 50px}.grid{display:grid;grid-template-columns:220px 1fr 290px;gap:18px}.card{background:linear-gradient(145deg,#071426,#06101f);border:1px solid #153454;border-radius:16px;box-shadow:0 12px 35px #0006}.side{padding:16px}.side div{padding:13px 12px;color:#a8bdd4;border-radius:10px;margin-bottom:4px}.side .sel{background:#1a2d72;color:white}.hero{min-height:205px;display:flex;align-items:center;padding:28px;position:relative;overflow:hidden;background:radial-gradient(circle at 25% 50%,#2420a0 0,#071326 52%,#06101e 100%)}.hero h1{font-size:32px;margin:8px 0}.hero p{color:#b9cae0;max-width:500px}.hero .pill{display:inline-block;background:#ff2f7d;padding:7px 12px;border-radius:15px;font-size:11px;font-weight:900}.wave{position:absolute;right:20px;bottom:25px;width:43%;height:60px;background:repeating-linear-gradient(90deg,#7d4cff 0 3px,transparent 3px 8px);mask-image:linear-gradient(90deg,transparent,#000 15%,#000 85%,transparent);opacity:.8}.now{padding:20px;display:grid;grid-template-columns:130px 1fr;gap:18px;margin-top:18px}.cover{height:130px;border-radius:12px;background:linear-gradient(135deg,#ff7b39,#4a48ff 50%,#090e1c);display:flex;align-items:end;padding:12px;font-weight:900}.meta{color:#8fa9c4;font-size:13px}.title{font-size:25px;font-weight:850;margin:7px 0}.progress{height:6px;background:#14243b;border-radius:6px;margin:18px 0}.progress i{display:block;width:44%;height:100%;background:linear-gradient(90deg,#ff2f7d,#7b5cff);border-radius:6px}.controls{display:flex;align-items:center;gap:22px}.play{width:48px;height:48px;border-radius:50%;border:0;background:#fff;color:#08101b;font-size:20px}.side2{padding:18px}.side2 h3{margin:0 0 15px}.rank{display:flex;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid #132941}.num{font-weight:900;color:#a979ff;width:18px}.thumb{width:42px;height:42px;border-radius:8px;background:linear-gradient(135deg,#ff397e,#3321a8)}.rank small{display:block;color:#91a8c0;margin-top:3px}.sponsor{margin-top:18px;padding:22px;text-align:center;background:#062116;border-color:#1a9b58}.sponsor b{color:#4df08e;font-size:22px}.lower{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}.box{padding:20px}.vote{display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid #132941}.btn{margin-top:14px;width:100%;padding:12px;border:0;border-radius:10px;background:linear-gradient(90deg,#ff2f7d,#715cff);color:white;font-weight:800}.status{color:#58e79a;font-size:12px;font-weight:800}.footer{margin-top:18px;padding:20px;text-align:center;color:#7e98b4;font-size:12px}@media(max-width:900px){.grid{grid-template-columns:1fr}.side{display:none}.nav{display:none}.lower{grid-template-columns:1fr}.hero h1{font-size:25px}}
+</style>
+<style>
+.monitor-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:18px}
+.monitor-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:14px}
+.monitor-label{font-size:11px;opacity:.65;text-transform:uppercase;letter-spacing:.08em}
+.monitor-value{font-size:25px;font-weight:800;margin-top:5px}
+.monitor-sub{font-size:11px;opacity:.55;margin-top:4px}
+.monitor-live{display:inline-flex;align-items:center;gap:7px;font-weight:700}
+.monitor-dot{width:9px;height:9px;border-radius:50%;background:#ff3158;box-shadow:0 0 12px #ff3158;display:inline-block}
+.chart-wrap{margin-top:14px;padding:14px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.1);border-radius:14px}
+#listenerChart{width:100%;height:120px}
+@media(max-width:800px){.monitor-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+
+<style>
+.vr2{margin-top:28px}.vr2-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.vr2-card{padding:16px;border-radius:16px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1)}
+.vr2-card h3{margin:0 0 10px}.vr2-row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.07)}
+.vr2-btn{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.07);color:inherit;border-radius:10px;padding:8px 11px;cursor:pointer}.vr2-btn:hover{background:rgba(255,255,255,.13)}
+.vr2-pill{display:inline-block;padding:5px 8px;border-radius:999px;background:rgba(255,255,255,.08);font-size:11px}
+.vr2-search{width:100%;box-sizing:border-box;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.18);color:inherit}
+.vr2-player{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.vr2-now{font-size:18px;font-weight:800}.vr2-small{font-size:11px;opacity:.6}
+.vr2-list{max-height:280px;overflow:auto}.vr2-actions{display:flex;gap:6px;flex-wrap:wrap}
+@media(max-width:800px){.vr2-grid{grid-template-columns:1fr}.vr2-row{align-items:flex-start}}
+</style>
+</head><body><header><div><div class="logo">VIRAL <span>RADIO</span></div><div class="tag">THE WORLD IS LISTENING</div></div><nav class="nav"><a href="#">Home</a><a href="#top">Top 10</a><a href="#vote">Vote</a><a href="#request">Request</a></nav><div class="live">● LIVE</div><div class="listeners">1,247 listeners</div></header><main class="wrap"><div class="grid"><aside class="card side"><div class="sel">🎧 Now Playing</div><div>🏆 Global Top 10</div><div>👍 Vote</div><div>🎵 Request a Song</div><div>🤖 AI DJ</div><div>📅 Schedule</div><div>📰 News & Trends</div><div>🌐 Social</div></aside><section><div class="card hero"><div><span class="pill">ON AIR</span><h1>AI DJ LIVE</h1><p id="dj">“Good vibes, great music and people from all over the world. This is Viral Radio!”</p><div class="status">● AI BROADCAST ACTIVE</div></div><div class="wave"></div></div><div class="card now"><div class="cover">VIRAL<br>RADIO</div><div><div class="meta">🎵 NOW PLAYING · GLOBAL POP</div><div class="title">Demo Track — The World Is Listening</div><div class="meta">Viral Radio Original Demo</div><div class="progress"><i></i></div><div class="controls"><span>1:42</span><button class="play" onclick="demo()">▶</button><span>3:24</span><span>🔊</span></div></div></div><div class="lower"><div class="card box" id="top"><h3>🏆 Global Top 10</h3><div class="rank"><b class="num">1</b><div class="thumb"></div><div>Dua Lipa<small>Houdini</small></div></div><div class="rank"><b class="num">2</b><div class="thumb"></div><div>The Weeknd<small>Dancing In The Flames</small></div></div><div class="rank"><b class="num">3</b><div class="thumb"></div><div>Imagine Dragons<small>Believer</small></div></div></div><div class="card box" id="vote"><h3>🗳️ Vote for Next Song</h3><div class="vote"><span>Flowers — Miley Cyrus</span><b>42%</b></div><div class="vote"><span>Calm Down — Rema</span><b>34%</b></div><div class="vote"><span>As It Was — Harry Styles</span><b>24%</b></div><button class="btn" onclick="vote()">VOTE NOW</button></div></div></section><aside class="card side2"><h3>🔥 Viral Track of the Hour</h3><div class="rank"><div class="thumb"></div><div><b>Demo Winner</b><small>Selected by listeners</small></div></div><button class="btn">VIEW GLOBAL TOP 10 →</button><div class="card sponsor"><small>SPONSOR SLOT</small><p><b>Your Brand</b></p><small>Be seen by a global audience</small></div></aside></div><div class="card footer" id="request">🌍 Worldwide • 🤖 AI DJ • 🗳️ Listener voting • 💬 Requests • 💰 Sponsor-ready<br><br>Viral Radio — The World Is Listening</div></main><script>function demo(){alert('Demo player ready. The real audio stream will be connected in the next step.')}function vote(){alert('Vote recorded in demo mode!')}</script>
+<section id="monitoring" style="margin-top:28px">
+  <h2>📊 LIVE MONITORING</h2>
+  <div class="monitor-grid">
+    <div class="monitor-card"><div class="monitor-label">Status</div><div class="monitor-value monitor-live"><span class="monitor-dot"></span>LIVE</div><div class="monitor-sub">Radio stream monitor</div></div>
+    <div class="monitor-card"><div class="monitor-label">Listeners now</div><div class="monitor-value" id="listenersNow">1,247</div><div class="monitor-sub">active listeners</div></div>
+    <div class="monitor-card"><div class="monitor-label">Peak today</div><div class="monitor-value" id="peakListeners">1,392</div><div class="monitor-sub">highest concurrent</div></div>
+    <div class="monitor-card"><div class="monitor-label">Avg. session</div><div class="monitor-value" id="avgSession">18m</div><div class="monitor-sub">estimated listening time</div></div>
+  </div>
+  <div class="chart-wrap">
+    <div class="monitor-label">Listeners — last 20 min</div>
+    <canvas id="listenerChart"></canvas>
+  </div>
+  <div class="monitor-grid">
+    <div class="monitor-card"><div class="monitor-label">Top country</div><div class="monitor-value" id="topCountry">🇮🇹 Italy</div><div class="monitor-sub">based on demo traffic</div></div>
+    <div class="monitor-card"><div class="monitor-label">Countries</div><div class="monitor-value">42</div><div class="monitor-sub">listeners worldwide</div></div>
+    <div class="monitor-card"><div class="monitor-label">Peak hour</div><div class="monitor-value">20:00</div><div class="monitor-sub">local station time</div></div>
+    <div class="monitor-card"><div class="monitor-label">Uptime</div><div class="monitor-value">99.9%</div><div class="monitor-sub">demo station</div></div>
+  </div>
+</section>
+
+<script>
+(() => {
+  const canvas = document.getElementById('listenerChart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let data = [940, 980, 1010, 995, 1040, 1080, 1120, 1095, 1150, 1180, 1210, 1190, 1235, 1205, 1250, 1228, 1260, 1240, 1268, 1247];
+
+  function draw(){
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    canvas.width = w*dpr; canvas.height = h*dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,w,h);
+    const min = Math.min(...data)-80, max = Math.max(...data)+80;
+    const x = i => 8 + i*(w-16)/(data.length-1);
+    const y = v => h-10-(v-min)*(h-20)/(max-min);
+    ctx.beginPath();
+    data.forEach((v,i)=> i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v)));
+    ctx.lineWidth=3;
+    ctx.strokeStyle=getComputedStyle(document.body).color || "#fff";
+    ctx.globalAlpha=.85;
+    ctx.stroke();
+    ctx.globalAlpha=1;
+  }
+
+  function tick(){
+    const delta = Math.round((Math.random()-.45)*36);
+    const n = Math.max(0, data[data.length-1]+delta);
+    data.push(n); data.shift();
+    const now = document.getElementById('listenersNow');
+    const peak = document.getElementById('peakListeners');
+    if(now) now.textContent = n.toLocaleString();
+    if(peak) peak.textContent = Math.max(parseInt(peak.textContent.replace(/,/g,''),10)||0,n).toLocaleString();
+    draw();
+  }
+  window.addEventListener('resize',draw);
+  draw();
+  setInterval(tick,5000);
+})();
+</script>
+
+<section class="vr2" id="viralRadioV2">
+  <div class="vr2-card">
+    <div class="vr2-player">
+      <button class="vr2-btn" id="playBtn">▶ Play</button>
+      <span class="vr2-now" id="nowPlayingV2">Midnight Pulse — Demo Mix</span>
+      <span class="vr2-pill">🔴 ON AIR</span>
+      <span class="vr2-small" id="audioState">Demo player — no paid stream</span>
+    </div>
+    <audio id="demoAudio" preload="none"></audio>
+  </div>
+
+  <div class="vr2-grid" style="margin-top:12px">
+    <div class="vr2-card">
+      <h3>🔥 Trending Now</h3>
+      <div id="trendingList" class="vr2-list"></div>
+    </div>
+    <div class="vr2-card">
+      <h3>🆕 New & Trending</h3>
+      <div id="newList" class="vr2-list"></div>
+    </div>
+    <div class="vr2-card">
+      <h3>🏆 Trending Ranking</h3>
+      <div id="rankingList" class="vr2-list"></div>
+    </div>
+  </div>
+
+  <div class="vr2-grid" style="margin-top:12px">
+    <div class="vr2-card">
+      <h3>🌍 Global Top 10</h3>
+      <div id="globalList" class="vr2-list"></div>
+    </div>
+    <div class="vr2-card">
+      <h3>💬 Request a Song</h3>
+      <input id="requestInput" class="vr2-search" placeholder="Song or artist">
+      <div class="vr2-actions" style="margin-top:8px">
+        <button class="vr2-btn" id="requestBtn">Send Request</button>
+        <span class="vr2-small" id="requestStatus"></span>
+      </div>
+      <h3 style="margin-top:18px">🗳️ Vote</h3>
+      <div id="voteList"></div>
+    </div>
+    <div class="vr2-card">
+      <h3>🌐 AI Language</h3>
+      <div class="vr2-row"><span>AI DJ</span><span class="vr2-pill" id="aiLang">AUTO</span></div>
+      <div class="vr2-row"><span>Audience language</span><span class="vr2-pill" id="audLang">Detecting…</span></div>
+      <div class="vr2-row"><span>Mode</span><span class="vr2-pill">🤖 Automatic</span></div>
+      <p class="vr2-small">The demo chooses content automatically; the owner does not need to change language for each listener.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+(() => {
+  const songs = [
+    {title:"Midnight Pulse", artist:"Nova Lane", likes:428, plays:1204, fresh:true},
+    {title:"Electric Horizon", artist:"Neon Avenue", likes:391, plays:1138, fresh:true},
+    {title:"Golden Frequency", artist:"Luna Ray", likes:356, plays:1084, fresh:false},
+    {title:"Ocean Lights", artist:"Skyline Echo", likes:319, plays:1011, fresh:true},
+    {title:"Afterglow", artist:"Violet Motion", likes:287, plays:944, fresh:false},
+    {title:"Digital Summer", artist:"The Signals", likes:264, plays:902, fresh:true},
+    {title:"City Hearts", artist:"Milo West", likes:239, plays:871, fresh:false},
+    {title:"Gravity", artist:"Astra Bloom", likes:218, plays:832, fresh:false},
+    {title:"Run With Me", artist:"Pulse Theory", likes:197, plays:801, fresh:true},
+    {title:"Starlight Drive", artist:"Echo District", likes:181, plays:765, fresh:false}
+  ];
+
+  const key="viralRadioVotesV2";
+  const votes=JSON.parse(localStorage.getItem(key)||"{}");
+
+  function score(s){ return s.likes*3+s.plays+Number(votes[s.title]||0)*8; }
+  function renderList(id, arr, actions=true){
+    const el=document.getElementById(id); if(!el) return;
+    el.innerHTML=arr.map((s,i)=>`
+      <div class="vr2-row">
+        <div><b>${i+1}. ${s.title}</b><div class="vr2-small">${s.artist} · ❤️ ${s.likes+(votes[s.title]||0)}</div></div>
+        ${actions?`<div class="vr2-actions"><button class="vr2-btn like" data-song="${s.title}">❤️</button><button class="vr2-btn dislike" data-song="${s.title}">👎</button><button class="vr2-btn skip" data-song="${s.title}">⏭️</button></div>`:""}
+      </div>`).join("");
+  }
+
+  function render(){
+    const trending=[...songs].sort((a,b)=>score(b)-score(a)).slice(0,5);
+    const fresh=songs.filter(x=>x.fresh).slice(0,5);
+    renderList("trendingList",trending);
+    renderList("newList",fresh);
+    renderList("rankingList",[...songs].sort((a,b)=>score(b)-score(a)).slice(0,10));
+    renderList("globalList",[...songs].sort((a,b)=>b.plays-a.plays).slice(0,10),false);
+    const vote=document.getElementById("voteList");
+    if(vote) vote.innerHTML=songs.slice(0,3).map(s=>`<div class="vr2-row"><span>${s.title}</span><button class="vr2-btn vote" data-song="${s.title}">🗳️ Vote <b>${votes[s.title]||0}</b></button></div>`).join("");
+  }
+
+  document.addEventListener("click",e=>{
+    const b=e.target.closest("button"); if(!b) return;
+    const song=b.dataset.song; if(!song) return;
+    if(b.classList.contains("like")||b.classList.contains("vote")) votes[song]=(votes[song]||0)+1;
+    if(b.classList.contains("dislike")) votes[song]=(votes[song]||0)-1;
+    if(b.classList.contains("skip")) document.getElementById("nowPlayingV2").textContent="Skipped — AI DJ selecting next track…";
+    localStorage.setItem(key,JSON.stringify(votes)); render();
+  });
+
+  document.getElementById("requestBtn")?.addEventListener("click",()=>{
+    const input=document.getElementById("requestInput"), status=document.getElementById("requestStatus");
+    const v=input.value.trim();
+    if(!v){status.textContent="Enter a song or artist.";return;}
+    const req=JSON.parse(localStorage.getItem("viralRadioRequestsV2")||"[]");
+    req.push({text:v,time:new Date().toISOString()});
+    localStorage.setItem("viralRadioRequestsV2",JSON.stringify(req));
+    input.value=""; status.textContent="✓ Request saved for the demo AI DJ.";
+  });
+
+  const lang=navigator.language||"en";
+  const map={it:"Italian",ro:"Romanian",en:"English",es:"Spanish",de:"German",fr:"French",pt:"Portuguese"};
+  const l=map[lang.slice(0,2)]||"English";
+  document.getElementById("aiLang").textContent=l.toUpperCase();
+  document.getElementById("audLang").textContent=l;
+
+  const audio=document.getElementById("demoAudio"), play=document.getElementById("playBtn"), state=document.getElementById("audioState");
+  play?.addEventListener("click",()=>{
+    if(audio.paused){ audio.play().then(()=>{play.textContent="⏸ Pause";state.textContent="Playing browser audio";}).catch(()=>{state.textContent="Demo mode: add a licensed stream later";});}
+    else {audio.pause();play.textContent="▶ Play";}
+  });
+
+  render();
+})();
+</script>
+</body></html>
