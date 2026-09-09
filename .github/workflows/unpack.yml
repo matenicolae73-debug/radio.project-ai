@@ -2,95 +2,104 @@ name: Unpack Project
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
 
 permissions:
   contents: write
 
 jobs:
   unpack:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Find ZIP
-        shell: bash
         run: |
           set -e
 
+          echo "=== ZIP-URI GĂSITE ==="
+          find . -type f -iname "*.zip" -not -path "./.git/*" -print
+
           ZIP=$(find . -type f -iname "*.zip" \
             -not -path "./.git/*" \
-            -print -quit)
+            -printf '%T@ %p\n' | sort -nr | head -1 | cut -d' ' -f2-)
 
           if [ -z "$ZIP" ]; then
-            echo "ERROR: Nu există niciun ZIP în repository."
+            echo "ERROR: Nu există niciun ZIP în GitHub."
             exit 1
           fi
 
-          echo "ZIP găsit: $ZIP"
+          echo "ZIP ales: $ZIP"
           echo "ZIP=$ZIP" >> "$GITHUB_ENV"
 
       - name: Extract ZIP
-        shell: bash
         run: |
           set -e
 
           rm -rf unpacked
           mkdir unpacked
 
-          unzip -o "$ZIP" -d unpacked
+          unzip -q -o "$ZIP" -d unpacked
 
-      - name: Move project to root
-        shell: bash
+          echo "=== CONȚINUT ==="
+          find unpacked -maxdepth 4 -type f | head -100
+
+      - name: Find package.json
         run: |
           set -e
-          shopt -s dotglob nullglob
 
-          entries=(unpacked/*)
+          PACKAGE=$(find unpacked -type f -name "package.json" -print -quit)
 
-          if [ "${#entries[@]}" -eq 1 ] && [ -d "${entries[0]}" ]; then
-            SRC="${entries[0]}"
-          else
-            SRC="unpacked"
+          if [ -z "$PACKAGE" ]; then
+            echo "ERROR: package.json NU există în ZIP."
+            echo "Structura ZIP-ului este:"
+            find unpacked -maxdepth 5 -print
+            exit 1
           fi
 
-          echo "Project: $SRC"
+          echo "package.json găsit:"
+          echo "$PACKAGE"
+          echo "PACKAGE=$PACKAGE" >> "$GITHUB_ENV"
 
-          for item in "$SRC"/*; do
+      - name: Copy project to root
+        run: |
+          set -e
+
+          PROJECT_DIR=$(dirname "$PACKAGE")
+
+          echo "PROJECT_DIR=$PROJECT_DIR"
+
+          shopt -s dotglob nullglob
+
+          for item in "$PROJECT_DIR"/*; do
             name=$(basename "$item")
 
-            case "$name" in
-              .git|.github)
-                ;;
-              *)
-                rm -rf "./$name"
-                cp -a "$item" "./$name"
-                ;;
-            esac
+            if [ "$name" != ".git" ]; then
+              rm -rf "./$name"
+              cp -a "$item" "./$name"
+            fi
           done
 
           rm -rf unpacked
           rm -f "$ZIP"
 
       - name: Verify
-        shell: bash
         run: |
-          echo "=== PROJECT ROOT ==="
+          set -e
+
+          echo "=== ROOT ==="
           ls -la
 
           if [ ! -f package.json ]; then
-            echo "ERROR: package.json nu a fost găsit."
+            echo "ERROR: package.json nu este în root."
             exit 1
           fi
 
-          echo "SUCCESS: package.json găsit."
+          echo "SUCCESS!"
+          echo "package.json este în root."
 
       - name: Commit
-        shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -102,5 +111,5 @@ jobs:
             exit 0
           fi
 
-          git commit -m "Unpack project"
+          git commit -m "Unpack Viral Radio project"
           git push
