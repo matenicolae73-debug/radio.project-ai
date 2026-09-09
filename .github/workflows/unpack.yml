@@ -15,44 +15,53 @@ jobs:
         run: |
           set -e
 
-          ZIP="Viral-Radio-CASTERFM-REAL-LISTENERS-FINAL.zip"
+          echo "=== ZIP-uri disponibile ==="
+          find . -maxdepth 1 -type f -name "*.zip" -print
 
-          if [ ! -f "$ZIP" ]; then
-            echo "ERROR: ZIP-ul nu exista!"
-            ls -la
+          ZIP=$(find . -maxdepth 1 -type f -name "*.zip" | head -n 1)
+
+          if [ -z "$ZIP" ]; then
+            echo "ERROR: Nu exista ZIP!"
             exit 1
           fi
+
+          echo "ZIP gasit: $ZIP"
 
           rm -rf /tmp/radio
           mkdir -p /tmp/radio
 
           unzip -o "$ZIP" -d /tmp/radio
 
-          echo "=== CONTINUT ZIP ==="
-          find /tmp/radio -maxdepth 4 -type f -print
+          echo "=== CAUT index.html ==="
 
-          PROJECT_DIR=$(find /tmp/radio -type f -name "index.html" -printf '%h\n' | head -n 1)
+          INDEX=$(find /tmp/radio -type f -name "index.html" | head -n 1)
 
-          if [ -z "$PROJECT_DIR" ]; then
+          if [ -z "$INDEX" ]; then
             echo "ERROR: index.html nu a fost gasit!"
+            find /tmp/radio -type f -print
             exit 1
           fi
 
-          echo "=== PROIECT GASIT ==="
+          echo "index.html gasit:"
+          echo "$INDEX"
+
+          PROJECT_DIR="${INDEX%/index.html}"
+
+          echo "Folder proiect:"
           echo "$PROJECT_DIR"
 
           cp -R "$PROJECT_DIR"/. .
 
           rm -f "$ZIP"
 
-          echo "=== PROIECT IN ROOT ==="
+          echo "=== PROIECT DEZARHIVAT ==="
           ls -la
 
-      - name: Commit and Push
+      - name: Commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add -A
-          git commit -m "Unpack Viral Radio CasterFM" || echo "Nothing to commit"
+          git commit -m "Unpack Viral Radio" || echo "Nothing to commit"
           git push
