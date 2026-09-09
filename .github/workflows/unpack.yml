@@ -3,88 +3,45 @@ name: Unpack Viral Radio
 on:
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
   unpack:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Find ZIP
+      - name: Find and unpack ZIP
         run: |
           set -e
 
-          ZIP=$(find . -type f -iname "*.zip" \
-            -not -path "./.git/*" \
-            -printf '%T@ %p\n' | sort -nr | head -1 | cut -d' ' -f2-)
+          ZIP=$(find . -maxdepth 1 -type f -name "*.zip" | head -n 1)
 
           if [ -z "$ZIP" ]; then
-            echo "ERROR: Nu există ZIP."
+            echo "ERROR: Nu exista niciun ZIP in root."
             exit 1
           fi
 
-          echo "ZIP găsit: $ZIP"
-          echo "ZIP=$ZIP" >> "$GITHUB_ENV"
+          echo "ZIP gasit: $ZIP"
 
-      - name: Extract
-        run: |
-          set -e
+          mkdir -p /tmp/radio
+          unzip -o "$ZIP" -d /tmp/radio
 
-          rm -rf unpacked
-          mkdir unpacked
+          rm -rf ./app ./api ./components ./lib ./public 2>/dev/null || true
 
-          unzip -o "$ZIP" -d unpacked
-
-          echo "=== FIȘIERE ==="
-          find unpacked -type f
-
-      - name: Put website in root
-        run: |
-          set -e
-
-          HTML=$(find unpacked -type f -name "index.html" -print -quit)
-
-          if [ -z "$HTML" ]; then
-            echo "ERROR: index.html nu a fost găsit."
-            exit 1
+          if [ -f "/tmp/radio/package.json" ]; then
+            cp -R /tmp/radio/. .
+          else
+            DIR=$(find /tmp/radio -name package.json -type f -print -quit | xargs dirname)
+            cp -R "$DIR"/. .
           fi
 
-          echo "index.html găsit: $HTML"
-
-          cp "$HTML" ./index.html
-
-          rm -rf unpacked
           rm -f "$ZIP"
-
-      - name: Verify
-        run: |
-          set -e
-
-          echo "=== ROOT ==="
-          ls -la
-
-          if [ ! -f index.html ]; then
-            echo "ERROR: index.html lipsește."
-            exit 1
-          fi
-
-          echo "SUCCESS: Viral Radio este în root."
 
       - name: Commit
         run: |
-          git config user.name "github-actions[bot]"
+          git config user.name "github-actions"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git add -A
-
-          if git diff --cached --quiet; then
-            echo "Nu există modificări."
-            exit 0
-          fi
-
-          git commit -m "Unpack Viral Radio website"
+          git add .
+          git commit -m "Unpack Viral Radio" || echo "Nothing to commit"
           git push
