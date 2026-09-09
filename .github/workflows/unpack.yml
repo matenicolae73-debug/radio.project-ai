@@ -3,8 +3,7 @@ name: Unpack Viral Radio
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
+    branches: ["main"]
 
 permissions:
   contents: write
@@ -17,52 +16,68 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Unzip project
+      - name: Unpack Viral-Radio-GITHUB-READY.zip
+        shell: bash
         run: |
           set -e
 
-          ZIP=$(find . -maxdepth 2 -type f -name "Viral-Radio-GITHUB-READY.zip" | head -n 1)
+          ZIP="./Viral-Radio-GITHUB-READY.zip"
 
-          if [ -z "$ZIP" ]; then
-            echo "ZIP NOT FOUND"
+          if [ ! -f "$ZIP" ]; then
+            echo "ERROR: Nu am găsit $ZIP"
             exit 1
           fi
 
-          echo "Found: $ZIP"
+          rm -rf unpacked
+          mkdir -p unpacked
 
-          mkdir -p /tmp/radio
-          unzip -o "$ZIP" -d /tmp/radio
+          unzip -o "$ZIP" -d unpacked
 
-          cp -f /tmp/radio/index.html ./index.html
-          cp -f /tmp/radio/vercel.json ./vercel.json
-          cp -f /tmp/radio/README.md ./README.md
-
-          mkdir -p ./api
-          cp -f /tmp/radio/api/listeners.js ./api/listeners.js
-
-          rm -f "$ZIP"
-
-      - name: Check files
+      - name: Move project files to root
+        shell: bash
         run: |
-          echo "=== PROJECT ==="
-          ls -la
-          echo "=== API ==="
-          ls -la api
-          test -f index.html
-          test -f api/listeners.js
-          test -f vercel.json
+          set -e
+          shopt -s dotglob nullglob
 
-      - name: Commit extracted project
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          entries=(unpacked/*)
 
-          git add -A
-
-          if git diff --cached --quiet; then
-            echo "Nothing to commit"
-            exit 0
+          if [ "${#entries[@]}" -eq 1 ] && [ -d "${entries[0]}" ]; then
+            SRC="${entries[0]}"
+          else
+            SRC="unpacked"
           fi
 
-          git commit -m "Unpack Viral Radio project"
-          git push
+          echo "Project source: $SRC"
+
+          for item in "$SRC"/*; do
+            name=$(basename "$item")
+
+            case "$name" in
+              .git|.github)
+                ;;
+              *)
+                rm -rf "./$name"
+                cp -a "$item" "./$name"
+                ;;
+            esac
+          done
+
+          rm -rf unpacked
+          rm -f "$ZIP"
+
+      - name: Check package.json
+        shell: bash
+        run: |
+          if [ ! -f "package.json" ]; then
+            echo "ERROR: package.json nu există în root."
+            echo "Structura proiectului nu este corectă."
+            exit 1
+          fi
+
+          echo "OK: package.json găsit."
+          ls -la
+
+      - name: Commit and push
+        shell: bash
+        run: |
+         
