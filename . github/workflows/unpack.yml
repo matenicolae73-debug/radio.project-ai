@@ -1,0 +1,68 @@
+name: Unpack Viral Radio
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  unpack:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Unzip project
+        run: |
+          set -e
+
+          ZIP=$(find . -maxdepth 2 -type f -name "Viral-Radio-GITHUB-READY.zip" | head -n 1)
+
+          if [ -z "$ZIP" ]; then
+            echo "ZIP NOT FOUND"
+            exit 1
+          fi
+
+          echo "Found: $ZIP"
+
+          mkdir -p /tmp/radio
+          unzip -o "$ZIP" -d /tmp/radio
+
+          cp -f /tmp/radio/index.html ./index.html
+          cp -f /tmp/radio/vercel.json ./vercel.json
+          cp -f /tmp/radio/README.md ./README.md
+
+          mkdir -p ./api
+          cp -f /tmp/radio/api/listeners.js ./api/listeners.js
+
+          rm -f "$ZIP"
+
+      - name: Check files
+        run: |
+          echo "=== PROJECT ==="
+          ls -la
+          echo "=== API ==="
+          ls -la api
+          test -f index.html
+          test -f api/listeners.js
+          test -f vercel.json
+
+      - name: Commit extracted project
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "Nothing to commit"
+            exit 0
+          fi
+
+          git commit -m "Unpack Viral Radio project"
+          git push
