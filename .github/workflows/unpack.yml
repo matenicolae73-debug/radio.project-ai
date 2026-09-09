@@ -1,0 +1,60 @@
+name: Unpack Viral Radio
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  unpack:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Unpack ZIP
+        run: |
+          set -e
+
+          ZIP=$(find . -maxdepth 1 -type f -name "*.zip" | head -n 1)
+
+          if [ -z "$ZIP" ]; then
+            echo "ERROR: Nu exista ZIP!"
+            exit 1
+          fi
+
+          echo "ZIP gasit: $ZIP"
+
+          rm -rf /tmp/radio
+          mkdir -p /tmp/radio
+
+          unzip -o "$ZIP" -d /tmp/radio
+
+          INDEX=$(find /tmp/radio -type f -name "index.html" | head -n 1)
+
+          if [ -z "$INDEX" ]; then
+            echo "ERROR: index.html nu a fost gasit!"
+            exit 1
+          fi
+
+          PROJECT_DIR="${INDEX%/index.html}"
+
+          cp -R "$PROJECT_DIR"/. .
+
+          rm -f "$ZIP"
+
+      - name: Push to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+          git commit -m "Deploy Viral Radio from ZIP" || echo "Nothing to commit"
+          git push origin HEAD:main
