@@ -1,9 +1,10 @@
 name: Unpack Viral Radio
 
 on:
-  workflow_dispatch:
   push:
-    branches: ["main"]
+    branches:
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -16,54 +17,30 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Find and unpack ZIP
-        shell: bash
+      - name: Unpack ZIP
         run: |
           set -e
 
-          ZIP=$(find . -maxdepth 1 -type f -iname "*.zip" -print -quit)
+          ZIP="Viral-Radio-REAL-LISTENERS-0-FIXED-v2.zip"
 
-          if [ -z "$ZIP" ]; then
-            echo "ERROR: Nu am găsit niciun fișier ZIP în repository."
+          if [ ! -f "$ZIP" ]; then
+            echo "ZIP not found: $ZIP"
             exit 1
           fi
 
-          echo "ZIP găsit: $ZIP"
-          unzip -o "$ZIP" -d unpacked
+          rm -rf /tmp/radio
+          mkdir -p /tmp/radio
 
-      - name: Move project files to root
-        shell: bash
-        run: |
-          set -e
-          shopt -s dotglob nullglob
+          unzip -o "$ZIP" -d /tmp/radio
 
-          entries=(unpacked/*)
+          cp -f /tmp/radio/index.html ./index.html
 
-          if [ "${#entries[@]}" -eq 1 ] && [ -d "${entries[0]}" ]; then
-            SRC="${entries[0]}"
-          else
-            SRC="unpacked"
-          fi
+          mkdir -p ./api
+          cp -f /tmp/radio/api/listeners.js ./api/listeners.js
 
-          echo "Sursă: $SRC"
-
-          for item in "$SRC"/*; do
-            name=$(basename "$item")
-
-            case "$name" in
-              .git|.github)
-                ;;
-              *)
-                rm -rf "./$name"
-                cp -a "$item" "./$name"
-                ;;
-            esac
-          done
-
-          rm -rf unpacked "$ZIP"
+          rm -f "$ZIP"
 
       - name: Commit changes
-        shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -71,9 +48,8 @@ jobs:
           git add -A
 
           if git diff --cached --quiet; then
-            echo "Nu există modificări."
-            exit 0
+            echo "No changes"
+          else
+            git commit -m "Deploy real listeners counter"
+            git push
           fi
-
-          git commit -m "Unpack Viral Radio project"
-          git push
