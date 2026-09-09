@@ -1,4 +1,4 @@
-name: Unpack Viral Radio CasterFM
+name: Unpack Viral Radio
 
 on:
   workflow_dispatch:
@@ -8,53 +8,51 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Unpack modified Viral Radio ZIP
+      - name: Unpack ZIP
         run: |
           set -e
 
           ZIP="Viral-Radio-CASTERFM-REAL-LISTENERS-FINAL.zip"
 
           if [ ! -f "$ZIP" ]; then
-            echo "ERROR: $ZIP nu exista in repository!"
-            echo "ZIP-urile gasite:"
-            find . -maxdepth 1 -type f -name "*.zip" -print
+            echo "ERROR: ZIP-ul nu exista!"
+            ls -la
             exit 1
           fi
 
-          echo "ZIP gasit: $ZIP"
+          rm -rf /tmp/radio
+          mkdir -p /tmp/radio
 
-          rm -rf /tmp/viral-radio
-          mkdir -p /tmp/viral-radio
+          unzip -o "$ZIP" -d /tmp/radio
 
-          unzip -o "$ZIP" -d /tmp/viral-radio
+          echo "=== CONTINUT ZIP ==="
+          find /tmp/radio -maxdepth 4 -type f -print
 
-          echo "Continut ZIP:"
-          find /tmp/viral-radio -maxdepth 3 -type f -print
-
-          PROJECT_DIR=$(find /tmp/viral-radio -name "index.html" -type f -printf '%h\n' | head -n 1)
+          PROJECT_DIR=$(find /tmp/radio -type f -name "index.html" -printf '%h\n' | head -n 1)
 
           if [ -z "$PROJECT_DIR" ]; then
             echo "ERROR: index.html nu a fost gasit!"
             exit 1
           fi
 
-          echo "Project directory: $PROJECT_DIR"
+          echo "=== PROIECT GASIT ==="
+          echo "$PROJECT_DIR"
 
           cp -R "$PROJECT_DIR"/. .
 
           rm -f "$ZIP"
 
-          echo "=== ROOT FINAL ==="
+          echo "=== PROIECT IN ROOT ==="
           ls -la
 
-      - name: Commit changes
+      - name: Commit and Push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add -A
-          git commit -m "Deploy Viral Radio CasterFM real listeners" || echo "Nothing to commit"
+          git commit -m "Unpack Viral Radio CasterFM" || echo "Nothing to commit"
           git push
