@@ -1,4 +1,4 @@
-name: Unpack Viral Radio
+name: Unpack Viral Radio CasterFM
 
 on:
   workflow_dispatch:
@@ -8,40 +8,53 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Find and unpack ZIP
+      - name: Unpack modified Viral Radio ZIP
         run: |
           set -e
 
-          ZIP=$(find . -maxdepth 1 -type f -name "*.zip" | head -n 1)
+          ZIP="Viral-Radio-CASTERFM-REAL-LISTENERS-FINAL.zip"
 
-          if [ -z "$ZIP" ]; then
-            echo "ERROR: Nu exista niciun ZIP in root."
+          if [ ! -f "$ZIP" ]; then
+            echo "ERROR: $ZIP nu exista in repository!"
+            echo "ZIP-urile gasite:"
+            find . -maxdepth 1 -type f -name "*.zip" -print
             exit 1
           fi
 
           echo "ZIP gasit: $ZIP"
 
-          mkdir -p /tmp/radio
-          unzip -o "$ZIP" -d /tmp/radio
+          rm -rf /tmp/viral-radio
+          mkdir -p /tmp/viral-radio
 
-          rm -rf ./app ./api ./components ./lib ./public 2>/dev/null || true
+          unzip -o "$ZIP" -d /tmp/viral-radio
 
-          if [ -f "/tmp/radio/package.json" ]; then
-            cp -R /tmp/radio/. .
-          else
-            DIR=$(find /tmp/radio -name package.json -type f -print -quit | xargs dirname)
-            cp -R "$DIR"/. .
+          echo "Continut ZIP:"
+          find /tmp/viral-radio -maxdepth 3 -type f -print
+
+          PROJECT_DIR=$(find /tmp/viral-radio -name "index.html" -type f -printf '%h\n' | head -n 1)
+
+          if [ -z "$PROJECT_DIR" ]; then
+            echo "ERROR: index.html nu a fost gasit!"
+            exit 1
           fi
+
+          echo "Project directory: $PROJECT_DIR"
+
+          cp -R "$PROJECT_DIR"/. .
 
           rm -f "$ZIP"
 
-      - name: Commit
+          echo "=== ROOT FINAL ==="
+          ls -la
+
+      - name: Commit changes
         run: |
-          git config user.name "github-actions"
+          git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .
-          git commit -m "Unpack Viral Radio" || echo "Nothing to commit"
+
+          git add -A
+          git commit -m "Deploy Viral Radio CasterFM real listeners" || echo "Nothing to commit"
           git push
